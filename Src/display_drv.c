@@ -49,19 +49,13 @@ Private void set_enable(int state);
 Private void drawBitmap(bitmap_T * bmp);
 Private void drawChar(char c, int x, int y);
 Private void drawString(char * str, int x, int y);
+Private void cyclic500ms(void);
 
 /********* Public functions  *********/
 Public void disp_init(void)
 {
 	//TODO : This should be set elsewhere...
 	set_enable(0);
-
-#if 0
-	video_memory[0] = 0xAAAAAAAAu;
-	video_memory[1] = 0xFFFFFFFFu;
-	video_memory[2] = 0x0F0F0F0Fu;
-	video_memory[3] = 0xF0F0F0F0u;
-#endif
 
 	//pixel_set(0, 0, 1);
 	//pixel_set(1, 1, 1);
@@ -81,6 +75,7 @@ Public void disp_init(void)
 Public void disp_scan(void)
 {
 	static uint8_t cycle = 0u;
+	static uint16_t counter = 0u;
 	uint8_t test_pattern[5] = { 0xffu, 0xffu, 0xffu, 0xffu, 0xffu };
 
 	set_latch(1);
@@ -100,22 +95,28 @@ Public void disp_scan(void)
 	test_pattern[3] = (video_memory[cycle] >> 16) & 0x000000ffu;
 	test_pattern[4] = (video_memory[cycle] >> 24) & 0x000000ffu;
 
-#if 0
-	if (cycle & 0x01u)
-	{
-		test_pattern[1] = 0xAAu;
-		test_pattern[2] = 0xAAu;
-		test_pattern[3] = 0xAAu;
-		test_pattern[4] = 0xAAu;
-	}
-#endif
-
 	HAL_SPI_Transmit(&hspi1, test_pattern, 5u, ~0);
+
+	//Deal with low frequency cyclic function.
+	if (++counter > 400u)
+	{
+		counter = 0u;
+		cyclic500ms();
+	}
+
 }
 
 
 
+
+
 /************** Private functions ************/
+Private void cyclic500ms(void)
+{
+	/* TODO : Add stuff here. */
+}
+
+
 Private void pixel_set(int x, int y, int val)
 {
 	if (x < 0 || x > 32  || y < 0 || y >= 8 || val < 0)
