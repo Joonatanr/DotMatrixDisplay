@@ -1,0 +1,2 @@
+display_drv.c:54:13:disp_init	40	static
+display_drv.c:81:13:disp_scan	16	static
